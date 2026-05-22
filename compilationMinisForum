@@ -1,0 +1,1 @@
+/home/carneiro/acpp/bin/acpp -DIMPROVED -O3 --acpp-stdpar --acpp-targets='hip:gfx1032' queensSTL.cpp -o newQueensSTL.exe -ltbb
