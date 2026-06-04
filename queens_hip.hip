@@ -5,6 +5,24 @@
 
 #define _EMPTY_      -1
 
+
+void gpu_warmup() {
+    int* d_warmup = nullptr;
+    int h_warmup = 0;
+
+    // 1. Force context initialization via a tiny allocation
+ 		hipMalloc(&d_warmup, sizeof(int));
+    
+    // 2. Trigger a tiny transfer to wake up the PCIe transfer lanes
+    hipMemcpy(d_warmup, &h_warmup, sizeof(int), hipMemcpyHostToDevice);
+
+    // 3. Force a heavy sync to ensure the driver is completely awake
+    hipDeviceSynchronize();
+
+    // 4. Free the throwaway memory
+    hipFree(d_warmup);
+}
+
 double rtclock()
 {
     struct timezone Tzp;
@@ -146,6 +164,11 @@ unsigned long long int BP_queens_prefixes(int size, int initialDepth,
     unsigned long long int local_tree = 0ULL;
     unsigned long long int num_sol = 0;
 
+    #ifdef IMPROVED
+    uint break_cond =  (size/2) + (size & 1);
+    #endif 
+
+
     /*initialization*/
     for (i = 0; i < size; ++i) { //
         board[i] = -1;
@@ -164,12 +187,27 @@ unsigned long long int BP_queens_prefixes(int size, int initialDepth,
                
         }else if ( MCstillLegal(board, depth) && !(flag &  bit_test ) ){//it is a valid subsol 
 
-                flag |= (1ULL<<board[depth]);
-                depth++;
-                ++local_tree;
-                if (depth == initialDepth){ //handle solution
-                   prefixesHandleSol(root_prefixes,flag,board,initialDepth,num_sol);
-                   num_sol++;
+        		#ifdef IMPROVED
+            if(depth == 1){
+
+                if(size& 1){
+                    if (board[0] == break_cond-1 && board[1] > board[0]) 
+                        break;
+                }
+                else{
+                    if (board[0] == break_cond)
+                        break;
+                }
+            }
+            #endif 
+
+            flag |= (1ULL<<board[depth]);
+            depth++;
+            ++local_tree;
+            
+            if (depth == initialDepth){ //handle solution
+            	prefixesHandleSol(root_prefixes,flag,board,initialDepth,num_sol);
+    	     		num_sol++;
             }else continue;
         }else continue;
 
@@ -214,9 +252,9 @@ void nqueens(int size, int initial_depth, int block_size, unsigned int n_explore
 	hipMemcpy(vector_of_tree_size_h, vector_of_tree_size_d, n_explorers*sizeof(unsigned long long), hipMemcpyDeviceToHost);
 	hipMemcpy(sols_h, sols_d, n_explorers*sizeof(unsigned long long), hipMemcpyDeviceToHost);
 
-	hipFree(vector_of_tree_size_d);
-	hipFree(sols_d);
-	hipFree(root_prefixes_d);
+//	hipFree(vector_of_tree_size_d);
+//	hipFree(sols_d);
+//	hipFree(root_prefixes_d);
 	
 }
 
@@ -225,7 +263,13 @@ int main(int argc, char *argv[])
 {
 
 
-	hipFree(0);
+	gpu_warmup();
+
+  #ifdef IMPROVED
+  printf("### IMPROVED SEARCH - Avoiding mirrored solutions\n");
+  #endif
+
+
 
 	if (argc != 4) {
 		printf("Usage: %s <size> <initial depth> <block size>\n", argv[0]);
@@ -251,16 +295,6 @@ int main(int argc, char *argv[])
 	unsigned long long *vector_of_tree_size_h = (unsigned long long*)malloc(sizeof(unsigned long long)*nMaxPrefixes);
 	unsigned long long *solutions_h = (unsigned long long*)malloc(sizeof(unsigned long long)*nMaxPrefixes);
 
-
-	if (root_prefixes_h == NULL || vector_of_tree_size_h == NULL || solutions_h == NULL) {
-		printf("Error: host out of memory\n");
-		if (root_prefixes_h) free(root_prefixes_h);
-		if (vector_of_tree_size_h) free(vector_of_tree_size_h);
-		if (solutions_h) free(solutions_h);
-		return 1;
-	}
-
-
   double initial_time = rtclock();
 
 	//initial search, getting Feasible, Valid and Incomplete solutions -- subproblems;
@@ -275,6 +309,11 @@ int main(int argc, char *argv[])
       qtd_sols_global += solutions_h[i];
       gpu_tree_size   += vector_of_tree_size_h[i];
   }
+
+   #ifdef IMPROVED
+       qtd_sols_global*=2;
+    #endif
+
 
   printf("\nInitial tree size: %llu", initial_tree_size );
   printf("\nGPU Tree size: %llu\nTotal tree size: %llu\nNumber of solutions found: %llu.\n", gpu_tree_size,(initial_tree_size+gpu_tree_size),qtd_sols_global );
