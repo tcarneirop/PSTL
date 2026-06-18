@@ -1,4 +1,6 @@
 $HOME/acpp/bin/acpp -O3 --acpp-stdpar --acpp-targets="hip:gfx90a" test.cpp -o test
+
+
 #acpp -O3 --acpp-stdpar --acpp-targets="hip:gfx90a;omp" test.cpp -o test
 #Architecture Matters: For Grid5000, always double-check the GPU model.
 ## -ltbb should be added if one receives the huge error

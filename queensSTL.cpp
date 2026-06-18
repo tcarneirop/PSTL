@@ -6,7 +6,10 @@
 #include <numeric>
 #include <iomanip>
 
-#define MAX_SIZE 20
+
+////////////  $ACPP_INSTALL_DIR/bin/acpp --acpp-stdpar --acpp-targets='hip:gfx1102' -O3 -ffast-math -DIMPROVED queensSTL.cpp -o test -ltbb
+
+#define MAX_SIZE 24
 #define _EMPTY_ -1
 
 // Cross-compiler support for restricted pointers
@@ -38,20 +41,6 @@ inline bool GPU_queens_stillLegal(const char * RESTRICT board, const int r) {
     return safe;
 }
 
-
-// Host-side legality check for prefix generation
-inline bool MCstillLegal(const char *board, const int r) {
-    int ld, rd;
-    for (int i = 0; i < r; ++i)
-        if (board[i] == board[r]) return false;
-    ld = board[r];
-    rd = board[r];
-    for (int i = r - 1; i >= 0; --i) {
-        --ld; ++rd;
-        if (board[i] == ld || board[i] == rd) return false;
-    }
-    return true;
-}
 
 // Core enumeration logic used inside the parallel STL loop
 //#ifdef __acpp__
@@ -98,6 +87,8 @@ void queens_subtree_enumeration(int N, int initial_depth, unsigned int idx,
     tree_sizes[idx] = tree_size;
 }
 
+
+
 // Sequential sub-problem generation on the CPU
 unsigned long long BP_queens_prefixes(int size, int initialDepth,
                                       unsigned long long *tree_size, 
@@ -120,8 +111,8 @@ unsigned long long BP_queens_prefixes(int size, int initialDepth,
 
         if (board[depth] == size) {
             board[depth] = _EMPTY_;
-        } else if (MCstillLegal(board, depth) && !(flag & bit_test)) {
-            
+        } else if (!(flag & bit_test) && GPU_queens_stillLegal(board, depth)) {
+
             #ifdef IMPROVED
             if(depth == 1){
                 if(size & 1){
@@ -165,7 +156,7 @@ int main(int argc, char *argv[]) {
     }
 
     unsigned long long initial_tree_size = 0ULL;
-    std::vector<QueenRoot> root_prefixes(1000000); 
+    std::vector<QueenRoot> root_prefixes(10000000); 
     
     std::cout << "### N-Queens Parallel STL | N: " << size << " | Depth: " << initialDepth;
     #ifdef IMPROVED
@@ -213,7 +204,6 @@ int main(int argc, char *argv[]) {
     #ifdef IMPROVED
     total_sols *= 2;
     #endif
-
     std::cout << "------------------------------------------" << std::endl;
     std::cout << "Initial tree nodes: " << initial_tree_size << std::endl;
     std::cout << "GPU tree nodes:     " << total_gpu_tree << std::endl;
@@ -222,3 +212,4 @@ int main(int argc, char *argv[]) {
 
     return 0;
 }
+
