@@ -1,5 +1,7 @@
 #!/bin/bash
 
+export ACPP_ADAPTIVITY_LEVEL=2
+
 # 3. SET COMPILER VARIABLES
 # Switching to the verified LLVM 18 paths
 export PSTL_HOME=/home/carneiro/PSTL
@@ -56,4 +58,5 @@ cd ${HOME}/PSTL
 echo "------------------------------------------------"
 echo "Build complete! AdaptiveCpp installed to: $ACPP_INSTALL_DIR"
 echo "To test: $ACPP_INSTALL_DIR/bin/acpp --acpp-stdpar --acpp-targets='hip:gfx1032' test.cpp -ltbb"
+echo " $ACPP_INSTALL_DIR/bin/acpp --acpp-stdpar --acpp-targets='hip:gfx1102' -O3 -std=c++20 -ffast-math -DIMPROVED test_stdpar.cpp -o test_stdpar"
 echo "------------------------------------------------"
