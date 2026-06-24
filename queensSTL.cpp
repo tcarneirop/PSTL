@@ -194,12 +194,10 @@ int main(int argc, char *argv[]) {
     std::for_each(std::execution::par_unseq, indices.begin(), indices.end(), [=](unsigned int idx) {
         queens_subtree_enumeration(size, initialDepth, idx, d_prefixes, d_trees, d_sols);
     });
-
-    double end_time = rtclock();
-
     // 5. Reduction and Symmetry Multiplier
     unsigned long long total_sols = std::accumulate(solutions.begin(), solutions.end(), 0ULL);
     unsigned long long total_gpu_tree = std::accumulate(tree_sizes.begin(), tree_sizes.end(), 0ULL);
+    double end_time = rtclock();
 
     #ifdef IMPROVED
     total_sols *= 2;

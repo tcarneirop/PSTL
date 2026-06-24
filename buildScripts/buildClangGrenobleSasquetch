@@ -1,0 +1,16 @@
+#!/bin/bash
+
+echo "Setting up LLVM 18 repositories..."
+wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo-g5k apt-key add -
+echo "deb http://apt.llvm.org/bullseye/ llvm-toolchain-bullseye-18 main" | sudo-g5k tee /etc/apt/sources.list.d/llvm18.list
+
+echo "Installing LLVM 18 and development headers..."
+sudo-g5k apt update
+sudo-g5k apt install -y clang-18 lld-18 libclang-18-dev libomp-18-dev clang-tools-18
+
+# 3. SET COMPILER VARIABLES
+# Switching to the verified LLVM 18 paths
+export LLVM_ROOT=/usr/lib/llvm-18
+export CC=$LLVM_ROOT/bin/clang
+export CXX=$LLVM_ROOT/bin/clang++
+sudo apt-get install libtbb-dev
