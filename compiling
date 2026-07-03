@@ -1,0 +1,6 @@
+make acpp-amd
+make acpp-nvidia
+make acpp-nvidia CUDA_ARCH=sm_89
+
+make nvc
+make nvc CUDA_ARCH=cc89

@@ -17,8 +17,6 @@
     #define RESTRICT
 #endif
 
-
-
 #include "../ChOp/NQueens/headers/queens_subproblem.hpp"
 #include "../ChOp/NQueens/headers/queens_CPU_GPU_subproblem_eval.hpp"
 #include "../ChOp/NQueens/headers/queens_sub_gen.hpp"
