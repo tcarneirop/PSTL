@@ -21,7 +21,7 @@
 
 typedef struct queen_root {
     unsigned int control;
-    int8_t board[12]; 
+    int8_t board[10]; 
 } QueenRoot;
 
 // Timing helper
