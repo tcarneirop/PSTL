@@ -71,5 +71,16 @@ nvc:
 	$(NVC) $(NVC_FLAGS) \
 	    $(SRC) -o $(TARGET)_nvc
 
+
+
+
+CLEAN_FILES := \
+	$(TARGET)_amd \
+	$(TARGET)_cuda \
+	$(TARGET)_nvc \
+	$(TEST_TARGET)_amd \
+	$(TEST_TARGET)_cuda
+
 clean:
-	rm -f $(TARGET)_amd $(TARGET)_cuda $(TARGET)_nvc
+	rm -f $(CLEAN_FILES)
+
