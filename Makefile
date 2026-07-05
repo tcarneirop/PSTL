@@ -15,7 +15,7 @@ COMMON_FLAGS := \
     -DIMPROVED \
     -DCHECKSOLS
 
-LIBS := -ltbb
+LIBS := 
 
 # ----------------------------------------------------------------------
 # AdaptiveCpp
@@ -31,7 +31,7 @@ ACPP_FLAGS := \
 
 acpp-amd:
 	$(ACPP) $(ACPP_FLAGS) \
-	    --acpp-targets=hip:$(AMD_ARCH) \
+	    --acpp-targets=hip:$(AMD_ARCH)  \
 	    $(SRC) -o $(TARGET)_amd $(LIBS)
 
 acpp-nvidia:
@@ -79,7 +79,9 @@ CLEAN_FILES := \
 	$(TARGET)_cuda \
 	$(TARGET)_nvc \
 	$(TEST_TARGET)_amd \
-	$(TEST_TARGET)_cuda
+	$(TEST_TARGET)_cuda \
+        test_stdpar
+
 
 clean:
 	rm -f $(CLEAN_FILES)

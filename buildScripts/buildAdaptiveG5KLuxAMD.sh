@@ -27,7 +27,7 @@ export ACPP_INSTALL_DIR=$HOME/acpp
 export ROCM_PATH=/opt/rocm-6.3.3
 # On newer LLVM, headers are often in a versioned subdirectory
 export OMP_HEADERS=$LLVM_ROOT/lib/clang/18/include
-
+export PSTL_HOME=$HOME/PSTL
 # 5. Prepare Build Directory
 # Clean start to prevent cache contamination from version 19
 cd $HOME/AdaptiveCpp/
@@ -62,7 +62,16 @@ cmake .. \
 echo "Starting build with $(nproc) cores..."
 make -j$(nproc) install
 
+
+cd $PSTL_HOME
+
 echo "------------------------------------------------"
 echo "Build complete! AdaptiveCpp installed to: $ACPP_INSTALL_DIR"
-echo "To test: $ACPP_INSTALL_DIR/bin/acpp --acpp-stdpar --acpp-targets='hip:gfx906' test.cpp"
+echo "To test: $ACPP_INSTALL_DIR/bin/acpp --acpp-stdpar --acpp-targets='hip: $(rocm_agent_enumerator | grep -v gfx000 | sort -u | head -1)' tests/test.cpp -o test -ltbb"
+echo " $ACPP_INSTALL_DIR/bin/acpp --acpp-stdpar --acpp-targets='hip:$(rocm_agent_enumerator | grep -v gfx000 | sort -u | head -1)' -O3 -std=c++20 -ffast-math -DIMPROVED tests/test_stdpar.cpp -o test_stdpar -ltbb"
 echo "------------------------------------------------"
+echo "------------------------------------------------"
+$ACPP_INSTALL_DIR/bin/acpp --acpp-stdpar --acpp-targets=hip:gfx1102 -O3 -std=c++20 -ffast-math -DIMPROVED tests/test_gpu_cpu.cpp -o test_stdpar -ltbb
+echo "------------------------------------------------"
+echo "--------        TESTING ...               ------"
+./test_stdpar
