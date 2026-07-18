@@ -15,7 +15,7 @@ COMMON_FLAGS := \
     -DIMPROVED \
     -DCHECKSOLS
 
-LIBS := 
+LIBS :=
 
 # ----------------------------------------------------------------------
 # AdaptiveCpp

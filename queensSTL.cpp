@@ -23,7 +23,6 @@
 #include "../ChOp/NQueens/headers/queens_default_enumeration.hpp"
 
 
-// Timing helper
 double rtclock() {
     auto now = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::microseconds>(now.time_since_epoch());
@@ -71,6 +70,10 @@ int main(int argc, char *argv[]) {
     std::vector<unsigned int> indices(n_explorers);
     std::iota(indices.begin(), indices.end(), 0);
 
+
+    double start_time = rtclock();
+
+
     const QueenRoot* RESTRICT d_prefixes = root_prefixes.data();
     unsigned long long* RESTRICT d_trees = tree_sizes.data();
     unsigned long long* RESTRICT d_sols = solutions.data();
@@ -83,7 +86,6 @@ int main(int argc, char *argv[]) {
     });
 
     // Start Timer AFTER warmup
-    double start_time = rtclock();
 
     // 4. Parallel Execution
     std::for_each(std::execution::par_unseq, indices.begin(), indices.end(), [=](unsigned int idx) {
