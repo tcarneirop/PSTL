@@ -204,7 +204,7 @@ int main(int argc, char *argv[]) {
     #endif
     std::cout << "------------------------------------------" << std::endl;
     std::cout << "Initial tree nodes: " << initial_tree_size << std::endl;
-    std::cout << "GPU tree nodes:     " << total_gpu_tree << std::endl;
+    std::cout << "PAR_UNSEQ tree nodes:     " << total_gpu_tree << std::endl;
     std::cout << "Solutions found:    " << total_sols << std::endl;
     std::cout << "Elapsed total:      " << std::fixed << std::setprecision(3) << (end_time - start_time) << "s" << std::endl;
 

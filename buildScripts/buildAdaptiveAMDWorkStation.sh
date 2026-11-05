@@ -1,59 +1,36 @@
 #!/bin/bash
 
-export ACPP_ADAPTIVITY_LEVEL=2
-
-# 3. SET COMPILER VARIABLES
-# Switching to the verified LLVM 18 paths
-export PSTL_HOME=/home/carneiro/PSTL
-export LLVM_ROOT=/usr/lib/llvm-18
-export CC=$LLVM_ROOT/bin/clang
-export CXX=$LLVM_ROOT/bin/clang++
-export LD_LIBRARY_PATH=$LLVM_ROOT/lib:/opt/rocm-6.3.1/lib:$LD_LIBRARY_PATH
-
-# 4. Define paths
+# Definições estritas para ROCm 7.2.0
+export ROCM_PATH=/opt/rocm-7.2.0
+export LLVM_ROOT=$ROCM_PATH/llvm
 export ACPP_INSTALL_DIR=$HOME/acpp
-export ROCM_PATH=/opt/rocm-6.3.1
-# On newer LLVM, headers are often in a versioned subdirectory
-export OMP_HEADERS=$LLVM_ROOT/lib/clang/18/include
 
-# 5. Prepare Build Directory
-# Clean start to prevent cache contamination from version 19
-cd $HOME/AdaptiveCpp/
-rm -rf build
-mkdir -p build && cd build
+# Limpeza para evitar qualquer contaminação de caminhos antigos
+rm -rf $HOME/acpp
+rm -rf $HOME/AdaptiveCpp/build
+mkdir -p $HOME/AdaptiveCpp/build && cd $HOME/AdaptiveCpp/build
 
-# 6. The Full CMake Command
-echo "Configuring AdaptiveCpp with Clang-18..."
+# Compilação forçada com o plugin de runtime ativado
 cmake .. \
-  -DCMAKE_PREFIX_PATH="/usr/lib/cmake:/usr/share/cmake" \
-  -DCMAKE_C_COMPILER=clang-18 \
-  -DCMAKE_CXX_COMPILER=clang++-18 \
   -DCMAKE_INSTALL_PREFIX=$ACPP_INSTALL_DIR \
   -DCMAKE_BUILD_TYPE=Release \
-  -DCMAKE_CXX_COMPILER=$CXX \
-  -DCMAKE_C_COMPILER=$CC \
+  -DCMAKE_CXX_COMPILER=$LLVM_ROOT/bin/clang++ \
+  -DCMAKE_C_COMPILER=$LLVM_ROOT/bin/clang \
   -DLLVM_DIR=$LLVM_ROOT/lib/cmake/llvm \
-  -DCLANG_EXECUTABLE_PATH=$CXX \
-  -DCLANG_INCLUDE_PATH=$LLVM_ROOT/lib/clang/18 \
-  -DACPP_LLD_PATH=$LLVM_ROOT/bin/ld.lld \
+  -DCLANG_RESOURCE_DIR=$LLVM_ROOT/lib/clang/22 \
   -DACPP_EXPERIMENTAL_LLVM=ON \
   -DWITH_ROCM_BACKEND=ON \
+  -DWITH_CPU_BACKEND=ON \
+  -DACPP_BUILD_CLANG_RT=ON \
   -DROCM_PATH=$ROCM_PATH \
   -DHIPRTC_LIBRARY=$ROCM_PATH/lib/libhiprtc.so \
-  -DOpenMP_CXX_FLAGS="-fopenmp" \
-  -DOpenMP_CXX_LIB_NAMES="omp" \
-  -DOpenMP_omp_LIBRARY=$LLVM_ROOT/lib/libomp.so \
-  -DOpenMP_CXX_INCLUDE_DIR="$OMP_HEADERS" \
-  -DOpenMP_C_FLAGS="-fopenmp" \
-  -DOpenMP_C_LIB_NAMES="omp" \
-  -DOpenMP_C_INCLUDE_DIR="$OMP_HEADERS" \
-  -DWITH_CUDA_BACKEND=OFF
+  -DWITH_CUDA_BACKEND=OFF \
+  -DCMAKE_VERBOSE_MAKEFILE=ON
 
-# 7. Build and Install
-echo "Starting build with $(nproc) cores..."
-make VERBOSE=1 -j$(nproc) install
+# Executa o make e captura a saída
+make -j$(nproc) install > build.log 2>&1
 
-cd ${HOME}/PSTL
+
 
 echo "------------------------------------------------"
 echo "Build complete! AdaptiveCpp installed to: $ACPP_INSTALL_DIR"
