@@ -17,10 +17,10 @@
     #define RESTRICT
 #endif
 
-#include "../ChOp/NQueens/headers/queens_subproblem.hpp"
-#include "../ChOp/NQueens/headers/queens_CPU_GPU_subproblem_eval.hpp"
-#include "../ChOp/NQueens/headers/queens_sub_gen.hpp"
-#include "../ChOp/NQueens/headers/queens_default_enumeration.hpp"
+#include "../headers/queens_subproblem.hpp"
+#include "../headers/queens_CPU_GPU_subproblem_eval.hpp"
+#include "../headers/queens_sub_gen.hpp"
+#include "../headers/queens_default_enumeration.hpp"
 
 
 double rtclock() {
